@@ -6,7 +6,7 @@ The **Glow Boarder Effect Renderer** contains shader setup with a glowing boarde
 The user can turn the **glow border effect** on and off and select **glow color** for individual objects.
 
 # How does it work?
-![Glow Border Effect Demo Scene](screenshots/glow_border_effect_demo_scene.png)
+![Glow Border Effect Demo Scene](screenshots/glow_border_effect_demo_scene.PNG)
 
 The **GlowBorderEffectRender** scene is included in the scene tree and objects that should recevie the glow border effect
 must include the GDScript **glow_border_effect_object.gd** on Spatial node that is a parent to any **VisualInstances** the object
@@ -49,7 +49,7 @@ func resized():
 ```
 
 # Behind the scene
-![Glow Boarder Effect Internal Scene](screenshots/glow_border_effect_internal_scene.png)
+![Glow Boarder Effect Internal Scene](screenshots/glow_border_effect_internal_scene.PNG)
 
 Inside the **GlowBorderEffectRender** a number of ViewportContainers and Viewports are used with shaders that
 first in the prepass render a shadow instance of each of the objects with glow border effect enabled. The 
@@ -63,4 +63,4 @@ The different steps are illustrated in the screendump below from the **glow_bord
 
 ## Screenshots
 
-![Glow Boarder Effect Explained](screenshots/glow_border_effect_explained.png)
+![Glow Boarder Effect Explained](screenshots/glow_border_effect_explained.PNG)
