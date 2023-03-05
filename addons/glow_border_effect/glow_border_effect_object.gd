@@ -1,5 +1,6 @@
-class_name GlowBorderEffectObject, "res://addons/glow_border_effect/glow_border_effect_renderer_icon.png"
-extends Spatial
+@icon("res://addons/glow_border_effect/glow_border_effect_renderer_icon.png")
+class_name GlowBorderEffectObject
+extends Node3D
 # Class to apply to object that shall glow.
 # Apply the GlowBorderEffectObject to a spatial node that hold
 # GeometryInstances and that should have the glowing border effect
@@ -7,14 +8,14 @@ extends Spatial
 # by calling the set_glow_border_effect function
 
 # Configuration of the glow color
-export var glow_color : Color = Color.yellow
+@export var glow_color : Color = Color.YELLOW
 
 # Configuration of the visual layer to use for drawing of shadow meshes
-export(int, LAYERS_3D_RENDER) var effect_layer = 0x400
+@export_flags_3d_render var effect_layer = 0x400 # (int, LAYERS_3D_RENDER)
 
 # Enable or disable the glow effect, either through
 # editor value or through the set_glow_border_effect function
-export var glow_border_effect : bool = false setget set_glow_border_effect
+@export var glow_border_effect : bool = false : set = set_glow_border_effect
 
 # Hold reference to created shadow objects used for glow rendering
 var _glow_shadow_objects : Array
@@ -22,7 +23,7 @@ var _glow_shadow_objects : Array
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var glow_material = SpatialMaterial.new()
+	var glow_material = StandardMaterial3D.new()
 	glow_material.albedo_color = glow_color
 	
 	# Create shadow meshes for all GeometryInstances
@@ -40,14 +41,14 @@ func set_glow_border_effect(val : bool):
 # for glow effect rendering
 func _create_shadow_meshes(obj, glow_material):
 	# Recurse down the stucture in case
-	# GeometryInstance exists as childs
+	# GeometryInstance3D exists as childs
 	for child in obj.get_children():
 		_create_shadow_meshes(child, glow_material)
 	
 	# Create shadow meshes for GeometryInstances
-	if obj is GeometryInstance:
+	if obj is GeometryInstance3D:
 		var new_name = "GlowObjectShadow_" + obj.name
-		var exist = find_node(new_name)
+		var exist = find_child(new_name)
 		if exist:
 			_glow_shadow_objects.append(exist)
 		else:
@@ -64,7 +65,7 @@ func _create_shadow_meshes(obj, glow_material):
 			glow_object.set_script(null)
 			
 			# Remove transformation
-			glow_object.transform = Transform.IDENTITY
+			glow_object.transform = Transform3D.IDENTITY
 			
 			# Ensure objects glow according setting
 			glow_object.set_visible(glow_border_effect)

@@ -1,69 +1,117 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=15 format=3 uid="uid://w5oba8vo0sje"]
 
-[ext_resource path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" type="PackedScene" id=1]
-[ext_resource path="res://addons/glow_border_effect/glow_border_effect_object.gd" type="Script" id=2]
-[ext_resource path="res://addons/glow_border_effect_test/glow_order_effect_demo_camera.gd" type="Script" id=3]
-[ext_resource path="res://addons/glow_border_effect_test/glow_border_effect_demo.gd" type="Script" id=4]
+[ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1"]
+[ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2"]
+[ext_resource type="Script" path="res://addons/glow_border_effect_test/glow_order_effect_demo_camera.gd" id="3"]
+[ext_resource type="Script" path="res://addons/glow_border_effect_test/glow_border_effect_demo.gd" id="4"]
 
-[sub_resource type="SpatialMaterial" id=5]
-albedo_color = Color( 0, 0.996078, 0.0156863, 1 )
+[sub_resource type="Shader" id="14"]
+code = "shader_type canvas_item;
 
-[sub_resource type="CubeMesh" id=1]
-material = SubResource( 5 )
+uniform sampler2D view_prepass;
+uniform sampler2D view_blure;
+uniform sampler2D view_scene;
+uniform float intensity : hint_range(0, 5);
 
-[sub_resource type="Animation" id=3]
-resource_name = "Pan Camera"
+void fragment() {
+	vec3 prepass = texture(view_prepass, UV).xyz; // prepass
+	vec3 blure = texture(view_blure, UV).xyz; // blurred
+	vec3 col = texture(view_scene, UV).xyz; // col
+	vec3 glow = min(vec3(1,1,1), max(vec3(0,0,0), blure - prepass)*intensity);
+	float luminance = glow.r * 0.299 + glow.g * 0.587 + glow.b * 0.114;
+	vec3 glow_inv = vec3(1.0,1.0,1.0) - vec3(luminance,luminance,luminance);
+	COLOR.xyz = col*glow_inv + glow;
+}"
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_56bd0"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_n78hn"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_nt2ct"]
+viewport_path = NodePath("ViewportScene")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qi42p"]
+resource_local_to_scene = true
+shader = SubResource("14")
+shader_parameter/intensity = 3.0
+shader_parameter/view_prepass = SubResource("ViewportTexture_n78hn")
+shader_parameter/view_blure = SubResource("ViewportTexture_56bd0")
+shader_parameter/view_scene = SubResource("ViewportTexture_nt2ct")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0nqfy"]
+albedo_color = Color(0.160784, 1, 0.231373, 1)
+
+[sub_resource type="BoxMesh" id="1"]
+material = SubResource("StandardMaterial3D_0nqfy")
+
+[sub_resource type="Animation" id="3"]
+resource_name = "Pan Camera3D"
 length = 4.0
-loop = true
+loop_mode = 1
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("CameraGimbal:rotation_degrees")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2, 4 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [ Vector3( 0, 0, 0 ), Vector3( 0, -71.948, 0 ), Vector3( 0, 0, 0 ) ]
+"values": [Vector3(0, 0, 0), Vector3(0, -71.948, 0), Vector3(0, 0, 0)]
 }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id="4"]
 length = 0.001
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("CameraGimbal:rotation_degrees")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ Vector3( 0, 0, 0 ) ]
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_e2lg2"]
+_data = {
+"Pan Camera3D": SubResource("3"),
+"RESET": SubResource("4")
 }
 
 [node name="GlowBorderEffectDemo" type="Node"]
-script = ExtResource( 4 )
+script = ExtResource("4")
 
-[node name="GlowBorderEffectRenderer" parent="." instance=ExtResource( 1 )]
+[node name="GlowBorderEffectRenderer" parent="." instance=ExtResource("1")]
+material = SubResource("ShaderMaterial_qi42p")
 
-[node name="GlowingObject" type="Spatial" parent="."]
-script = ExtResource( 2 )
+[node name="GlowingObject" type="Node3D" parent="."]
+script = ExtResource("2")
 glow_border_effect = true
 
-[node name="MeshInstance" type="MeshInstance" parent="GlowingObject"]
-mesh = SubResource( 1 )
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GlowingObject"]
+transform = Transform3D(2.13299, 0, 0, 0, 2.13299, 0, 0, 0, 2.13299, 0, 0, 0)
+mesh = SubResource("1")
 skeleton = NodePath("../..")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-autoplay = "Pan Camera"
-"anims/Pan Camera" = SubResource( 3 )
-anims/RESET = SubResource( 4 )
+autoplay = "Pan Camera3D"
+libraries = {
+"": SubResource("AnimationLibrary_e2lg2")
+}
 
-[node name="CameraGimbal" type="Spatial" parent="."]
+[node name="CameraGimbal" type="Node3D" parent="."]
 
-[node name="Camera" type="Camera" parent="CameraGimbal"]
-transform = Transform( 1, 0, 0, 0, 0.916949, 0.399005, 0, -0.399005, 0.916949, 0, 1.72713, 4 )
-script = ExtResource( 3 )
+[node name="Camera3D" type="Camera3D" parent="CameraGimbal"]
+transform = Transform3D(1, 0, 0, 0, 0.916949, 0.399005, 0, -0.399005, 0.916949, 0, 1.72713, 4)
+current = true
+script = ExtResource("3")
 glow_border_effect_renderer_path = NodePath("../../GlowBorderEffectRenderer")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.738602, 0.488652, -0.464421, -0.413671, 0.872479, 0.260109, 0.5323, 1.58638e-08, 0.846556, -2.43781, 0, 0)

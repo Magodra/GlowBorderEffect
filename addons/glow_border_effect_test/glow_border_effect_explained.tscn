@@ -1,22 +1,42 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=21 format=3 uid="uid://df1ilfxugnd5p"]
 
-[ext_resource path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" type="PackedScene" id=1]
-[ext_resource path="res://addons/glow_border_effect/glow_border_effect_object.gd" type="Script" id=2]
+[ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1"]
+[ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2"]
 
-[sub_resource type="GDScript" id=11]
+[sub_resource type="GDScript" id="11"]
 script/source = "extends Node
 # Setup for displaying internal shader results in different view
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$ViewportContainerPrepass.material.set_shader_param(\"view\", $GlowBorderEffectRenderer.find_node(\"ViewportPrepass\").get_texture())
-	$ViewportContainerBlur.material.set_shader_param(\"view\", $GlowBorderEffectRenderer.find_node(\"ViewportBlure\").get_texture())
-	$ViewportContainerGlow.material.set_shader_param(\"view_prepass\", $GlowBorderEffectRenderer.find_node(\"ViewportBlure\").get_texture())
-	$ViewportContainerGlow.material.set_shader_param(\"view_blure\", $GlowBorderEffectRenderer.find_node(\"ViewportPrepass\").get_texture())
+	#await RenderingServer.frame_post_draw
+	%ColorRectPrepass.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportPrepass\").get_texture())
+	%ColorRectHalfBlure.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportHalfBlure\").get_texture())
+	%ColorRectBlur.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportBlure\").get_texture())
+	%ColorRectGlow.material.set_shader_parameter(\"view_prepass\", %GlowBorderEffectRenderer.find_child(\"ViewportBlure\").get_texture())
+	%ColorRectGlow.material.set_shader_parameter(\"view_blure\", %GlowBorderEffectRenderer.find_child(\"ViewportPrepass\").get_texture())
+	%ColorRectScene.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportScene\").get_texture())
+	
 "
 
-[sub_resource type="Shader" id=7]
+[sub_resource type="Shader" id="Shader_w0lu2"]
+resource_local_to_scene = true
+code = "shader_type canvas_item;
+
+uniform sampler2D view;
+
+void fragment() {
+	COLOR.xyz = texture(view,UV).xyz;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5lsj6"]
+resource_local_to_scene = true
+shader = SubResource("Shader_w0lu2")
+
+[sub_resource type="Shader" id="Shader_eohkp"]
+resource_local_to_scene = true
 code = "shader_type canvas_item;
 
 uniform sampler2D view;
@@ -25,28 +45,30 @@ void fragment() {
 	COLOR.xyz = texture(view,UV).xyz;
 }"
 
-[sub_resource type="ViewportTexture" id=14]
-viewport_path = NodePath("ViewportContainerPrepass/Viewport")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tb5a1"]
+shader = SubResource("Shader_eohkp")
 
-[sub_resource type="ShaderMaterial" id=6]
+[sub_resource type="Shader" id="Shader_g6ead"]
 resource_local_to_scene = true
-shader = SubResource( 7 )
-shader_param/view = SubResource( 14 )
+code = "shader_type canvas_item;
 
-[sub_resource type="ViewportTexture" id=15]
-viewport_path = NodePath("ViewportContainerBlur/Viewport")
+uniform sampler2D view;
 
-[sub_resource type="ShaderMaterial" id=9]
+void fragment() {
+	COLOR.xyz = texture(view,UV).xyz;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ydawo"]
 resource_local_to_scene = true
-shader = SubResource( 7 )
-shader_param/view = SubResource( 15 )
+shader = SubResource("Shader_g6ead")
 
-[sub_resource type="Shader" id=10]
+[sub_resource type="Shader" id="Shader_qqwfj"]
 code = "shader_type canvas_item;
 
 uniform sampler2D view_prepass;
 uniform sampler2D view_blure;
-uniform float intensity : hint_range(0, 5);
+uniform float intensity : hint_range(0.0, 5.0) = 1.0;
 
 void fragment() {
 	vec3 prepass = texture(view_prepass, UV).xyz; // prepass
@@ -55,131 +77,159 @@ void fragment() {
 	COLOR.xyz = glow;
 }"
 
-[sub_resource type="ShaderMaterial" id=8]
-shader = SubResource( 10 )
-shader_param/intensity = 3.104
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ktnsu"]
+resource_local_to_scene = true
+shader = SubResource("Shader_qqwfj")
+shader_parameter/intensity = 3.525
 
-[sub_resource type="CubeMesh" id=12]
+[sub_resource type="Shader" id="Shader_c8nsn"]
+code = "shader_type canvas_item;
 
-[sub_resource type="SpatialMaterial" id=13]
-albedo_color = Color( 0.298039, 0.87451, 0.0666667, 1 )
+uniform sampler2D view;
+
+void fragment() {
+	COLOR.xyz = texture(view,UV).xyz;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uttx"]
+resource_local_to_scene = true
+shader = SubResource("Shader_c8nsn")
+
+[sub_resource type="Shader" id="14"]
+code = "shader_type canvas_item;
+
+uniform sampler2D view_prepass;
+uniform sampler2D view_blure;
+uniform sampler2D view_scene;
+uniform float intensity : hint_range(0, 5);
+
+void fragment() {
+	vec3 prepass = texture(view_prepass, UV).xyz; // prepass
+	vec3 blure = texture(view_blure, UV).xyz; // blurred
+	vec3 col = texture(view_scene, UV).xyz; // col
+	vec3 glow = min(vec3(1,1,1), max(vec3(0,0,0), blure - prepass)*intensity);
+	float luminance = glow.r * 0.299 + glow.g * 0.587 + glow.b * 0.114;
+	vec3 glow_inv = vec3(1.0,1.0,1.0) - vec3(luminance,luminance,luminance);
+	COLOR.xyz = col*glow_inv + glow;
+}"
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_83oj4"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_v12h5"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_cds62"]
+viewport_path = NodePath("ViewportScene")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2q01f"]
+resource_local_to_scene = true
+shader = SubResource("14")
+shader_parameter/intensity = 3.0
+shader_parameter/view_prepass = SubResource("ViewportTexture_v12h5")
+shader_parameter/view_blure = SubResource("ViewportTexture_83oj4")
+shader_parameter/view_scene = SubResource("ViewportTexture_cds62")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1cxsw"]
+albedo_color = Color(1, 0.0313726, 0.0235294, 1)
+
+[sub_resource type="BoxMesh" id="12"]
+material = SubResource("StandardMaterial3D_1cxsw")
 
 [node name="GlowBorderEffectExplained" type="Node"]
-script = SubResource( 11 )
-__meta__ = {
-"_editor_description_": ""
-}
+script = SubResource("11")
 
-[node name="GlowBorderEffectRenderer" parent="." instance=ExtResource( 1 )]
-anchor_left = 1.0
-anchor_top = 1.0
-margin_left = -512.0
-margin_top = -300.0
-
-[node name="ViewportContainerPrepass" type="ViewportContainer" parent="."]
-material = SubResource( 6 )
-margin_right = 512.0
-margin_bottom = 300.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Viewport" type="Viewport" parent="ViewportContainerPrepass"]
-size = Vector2( 512, 300 )
-transparent_bg = true
-handle_input_locally = false
-render_target_update_mode = 3
-
-[node name="ViewportContainerBlur" type="ViewportContainer" parent="."]
-material = SubResource( 9 )
-anchor_left = 1.0
+[node name="GridContainer2" type="GridContainer" parent="."]
+anchors_preset = 15
 anchor_right = 1.0
-margin_left = -512.0
-margin_bottom = 300.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Viewport" type="Viewport" parent="ViewportContainerBlur"]
-size = Vector2( 512, 300 )
-transparent_bg = true
-handle_input_locally = false
-render_target_update_mode = 3
-
-[node name="ViewportContainerGlow" type="ViewportContainer" parent="."]
-material = SubResource( 8 )
-anchor_top = 1.0
 anchor_bottom = 1.0
-margin_top = -300.0
-margin_right = 512.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
 
-[node name="Viewport" type="Viewport" parent="ViewportContainerGlow"]
-size = Vector2( 512, 300 )
-handle_input_locally = false
-render_target_update_mode = 3
+[node name="ColorRectPrepass" type="ColorRect" parent="GridContainer2"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_5lsj6")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRectHalfBlure" type="ColorRect" parent="GridContainer2"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_tb5a1")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRectBlur" type="ColorRect" parent="GridContainer2"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_ydawo")
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRectGlow" type="ColorRect" parent="GridContainer2"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_ktnsu")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRectScene" type="ColorRect" parent="GridContainer2"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_1uttx")
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GlowBorderEffectRenderer" parent="GridContainer2" instance=ExtResource("1")]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_2q01f")
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="GridContainer" type="GridContainer" parent="."]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-columns = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
+columns = 3
 
-[node name="Label" type="Label" parent="GridContainer"]
-margin_top = 284.0
-margin_right = 510.0
-margin_bottom = 298.0
+[node name="Label1" type="Label" parent="GridContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 6
 text = "Prepass draw shadow VisualInstances with glow color"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="Label5" type="Label" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply HalvBlure shader to the prepass"
 
 [node name="Label2" type="Label" parent="GridContainer"]
-margin_left = 514.0
-margin_top = 284.0
-margin_right = 1024.0
-margin_bottom = 298.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Apply blure shader to the prepass"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label3" type="Label" parent="GridContainer"]
-margin_top = 586.0
-margin_right = 510.0
-margin_bottom = 600.0
+layout_mode = 2
 text = "Blure - Prepass = Glowing border :)"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="Label6" type="Label" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sceen rendered before apply of glow."
 
 [node name="Label4" type="Label" parent="GridContainer"]
-margin_left = 514.0
-margin_top = 586.0
-margin_right = 1024.0
-margin_bottom = 600.0
+layout_mode = 2
 text = "Glowing border applied on top of sceen"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Spatial" type="Spatial" parent="."]
-script = ExtResource( 2 )
+[node name="Node3D" type="Node3D" parent="."]
+script = ExtResource("2")
 glow_border_effect = true
 
-[node name="MeshInstance" type="MeshInstance" parent="Spatial"]
-mesh = SubResource( 12 )
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D"]
+transform = Transform3D(2.1714, 0, 0, 0, 2.1714, 0, 0, 0, 2.1714, 0, 0, 0)
+mesh = SubResource("12")
 skeleton = NodePath("../..")
-material/0 = SubResource( 13 )
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444541, 0.525308, -0.378266, 0.762211, -2.3437, 0.0859294, 1.97327)

@@ -1,4 +1,4 @@
-extends ViewportContainer
+extends SubViewportContainer
 # Collection of viewports and shaders to create the glowing border effect
 # The GlowBorderEffectRender configure the needed viewports and
 # ViewportContainers to create the glowing border effect.
@@ -8,42 +8,42 @@ extends ViewportContainer
 # Cull mask for cameras
 ## Set the cull mask used to view the visuall layer defined
 ## for the GlowBorderEffectObject
-export(int, LAYERS_3D_RENDER) var effect_cull_mask = 0x00400 setget set_effect_cull_mask
+@export_flags_3d_render var effect_cull_mask = 0x00400 : set = set_effect_cull_mask # (int, LAYERS_3D_RENDER)
 ## Set the cull mask use to render the scene. Should
 ## not include the effect_cull_mask bit.
-export(int, LAYERS_3D_RENDER) var scene_cull_mask = 0xffbff setget set_scene_cull_mask
+@export_flags_3d_render var scene_cull_mask = 0xffbff : set = set_scene_cull_mask # (int, LAYERS_3D_RENDER)
 ## Set the intensity of the border
-export(float, 0.0, 5.0, 0.1) var intensity = 3.0 setget set_intensity
+@export var intensity = 3.0 : set = set_intensity # (float, 0.0, 5.0, 0.1)
 
 # Create references to cameras
-onready var camera_prepass = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass/Camera
-onready var camera_scene = $ViewportScene/Camera
+@onready var camera_prepass = %Camera3DPrepass
+@onready var camera_scene = %Camera3DScene
 
 # Create references to viewports
-onready var view_prepass = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass
-onready var view_half_blure = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure
-onready var view_blure = $ViewportBlure
-onready var view_scene = $ViewportScene
+@onready var view_prepass = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass
+@onready var view_half_blure = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure
+@onready var view_blure = $ViewportBlure
+@onready var view_scene = $ViewportScene
 
 # Create references to viewport containers
-onready var container_gaussian_y = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY
-onready var container_gaussian_x = $ViewportBlure/ViewportContainerBlureX
+@onready var container_gaussian_y = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY
+@onready var container_gaussian_x = $ViewportBlure/ViewportContainerBlureX
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# Setup shader inputs
-	material.set_shader_param("intensity", intensity)
-	material.set_shader_param("view_prepass", view_prepass.get_texture())
-	material.set_shader_param("view_blure", view_blure.get_texture())
-	material.set_shader_param("view_scene", view_scene.get_texture())
+	material.set_shader_parameter("intensity", intensity)
+	material.set_shader_parameter("view_prepass", view_prepass.get_texture())
+	material.set_shader_parameter("view_blure", view_blure.get_texture())
+	material.set_shader_parameter("view_scene", view_scene.get_texture())
 	
 	# Ensure that the internal cameras cull sceen and shadow objects
 	camera_prepass.cull_mask = effect_cull_mask
 	camera_scene.cull_mask = scene_cull_mask
 	
 	# Resize all internal views
-	resize()
+	#resize()
 
 
 # Setter function for the effect_cull_mask. Ensure update of prepass camera
@@ -63,22 +63,22 @@ func set_scene_cull_mask(val):
 # Setter function for the intensity. Enusre update of the internal shader
 func set_intensity(val):
 	intensity = val
-	material.set_shader_param("intensity", intensity)
+	material.set_shader_parameter("intensity", intensity)
 
 
 # Call this to resize all the internal views of the GlowBorderEffectRenderer
-func resize():
-	view_prepass.size = rect_size
-	view_half_blure.size = rect_size
-	view_blure.size = rect_size
-	view_scene.size = rect_size
-	container_gaussian_x.rect_size = rect_size
-	container_gaussian_y.rect_size = rect_size
+#func resize():
+	#view_prepass.size = size
+	#view_half_blure.size = size
+	#view_blure.size = size
+	#view_scene.size = size
+	#container_gaussian_x.size = size
+	#container_gaussian_y.size = size
 
 
 # Call this function to align the internal cameras in the
 # GlowBorderEffectRenderer with an external camera
-func camera_transform_changed(camera : Camera):
+func camera_transform_changed(camera : Camera3D):
 	var transform = camera.global_transform
 	camera_prepass.global_transform = transform
 	camera_scene.global_transform = transform
@@ -86,7 +86,7 @@ func camera_transform_changed(camera : Camera):
 
 # Call this function to update internal cameras with parameters
 # from external camera. 
-func set_camera_parameters(camera : Camera):
+func set_camera_parameters(camera : Camera3D):
 	# No need to update the following camera parameters:
 	# cull_mask as handled by separate functions
 	# current, doppler_tracking as this dosn't affect the rendering
@@ -121,5 +121,5 @@ func set_camera_parameters(camera : Camera):
 
 
 # Callback to receive the current camera transform
-func _on_camera_transform_changed(camera : Camera):
+func _on_camera_transform_changed(camera : Camera3D):
 	camera_transform_changed(camera)

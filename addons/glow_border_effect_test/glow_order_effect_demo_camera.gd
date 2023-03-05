@@ -1,11 +1,11 @@
-extends Camera
+extends Camera3D
 
-## Path to the glow border effect renderer for update of camera parameters
+## Path3D to the glow border effect renderer for update of camera parameters
 ## and transforms
-export var glow_border_effect_renderer_path : NodePath
+@export var glow_border_effect_renderer_path : NodePath
 
 # Internal cached reference to the glow border effect renderer
-onready var _glow_border_effect_renderer = get_node(glow_border_effect_renderer_path)
+@onready var _glow_border_effect_renderer = get_node(glow_border_effect_renderer_path)
 
 
 # Called when the node enters the scene tree for the first time.
