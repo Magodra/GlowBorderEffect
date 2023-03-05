@@ -46,21 +46,29 @@ func _create_shadow_meshes(obj, glow_material):
 	
 	# Create shadow meshes for GeometryInstances
 	if obj is GeometryInstance:
-		var glow_object = obj.duplicate()
-		glow_object.layers = effect_layer
-		glow_object.set_material_override(glow_material)
-		
-		# Clean up and remove StaticBody
-		for sub in glow_object.get_children():
-			if sub is StaticBody:
+		var new_name = "GlowObjectShadow_" + obj.name
+		var exist = find_node(new_name)
+		if exist:
+			_glow_shadow_objects.append(exist)
+		else:
+			var glow_object = obj.duplicate()
+			glow_object.set_name(new_name)
+			glow_object.layers = effect_layer
+			glow_object.set_material_override(glow_material)
+			
+			# Clean up and remove children
+			for sub in glow_object.get_children():
 				glow_object.remove_child(sub)
-				
-		# Remove scripts
-		glow_object.set_script(null)
-		
-		# Ensure objects glow according setting
-		glow_object.set_visible(glow_border_effect)
-		
-		# Now add the new shadow object to the tree
-		obj.add_child(glow_object)
-		_glow_shadow_objects.append(glow_object)
+					
+			# Remove scripts
+			glow_object.set_script(null)
+			
+			# Remove transformation
+			glow_object.transform = Transform.IDENTITY
+			
+			# Ensure objects glow according setting
+			glow_object.set_visible(glow_border_effect)
+			
+			# Now add the new shadow object to the tree
+			obj.add_child(glow_object)
+			_glow_shadow_objects.append(glow_object)

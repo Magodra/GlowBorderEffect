@@ -5,10 +5,11 @@
 [ext_resource path="res://addons/glow_border_effect_test/glow_order_effect_demo_camera.gd" type="Script" id=3]
 [ext_resource path="res://addons/glow_border_effect_test/glow_border_effect_demo.gd" type="Script" id=4]
 
-[sub_resource type="CubeMesh" id=1]
+[sub_resource type="SpatialMaterial" id=5]
+albedo_color = Color( 0, 0.996078, 0.0156863, 1 )
 
-[sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.298039, 0.87451, 0.0666667, 1 )
+[sub_resource type="CubeMesh" id=1]
+material = SubResource( 5 )
 
 [sub_resource type="Animation" id=3]
 resource_name = "Pan Camera"
@@ -54,7 +55,6 @@ glow_border_effect = true
 [node name="MeshInstance" type="MeshInstance" parent="GlowingObject"]
 mesh = SubResource( 1 )
 skeleton = NodePath("../..")
-material/0 = SubResource( 2 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "Pan Camera"

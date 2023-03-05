@@ -81,7 +81,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
 __meta__ = {
-"_edit_use_anchors_": false,
 "_editor_description_": "The GlowBorderEffectRender configure the needed viewports and ViewportContainers to create the glowing border effect.
 To align the internal cameras with the current camera of your  sceen call the camera_transform_changed."
 }
@@ -109,7 +108,7 @@ render_target_update_mode = 3
 
 [node name="Camera" type="Camera" parent="ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass"]
 transform = Transform( 0.877582, -0.229849, 0.420736, 0, 0.877582, 0.479426, -0.479426, -0.420736, 0.770151, 1.68294, 1.9177, 3.0806 )
-cull_mask = 2
+cull_mask = 1024
 environment = ExtResource( 5 )
 
 [node name="ViewportScene" type="Viewport" parent="."]
@@ -118,5 +117,5 @@ render_target_update_mode = 3
 
 [node name="Camera" type="Camera" parent="ViewportScene"]
 transform = Transform( 0.877582, -0.229849, 0.420736, 0, 0.877582, 0.479426, -0.479426, -0.420736, 0.770151, 1.68294, 1.9177, 3.0806 )
-cull_mask = 1048573
+cull_mask = 1047551
 environment = SubResource( 13 )
