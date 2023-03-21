@@ -1,0 +1,81 @@
+[gd_scene load_steps=14 format=3 uid="uid://t1rsb3h8lox3"]
+
+[ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1_t44cp"]
+[ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2_llqfq"]
+[ext_resource type="Script" path="res://addons/glow_border_effect_test/glow_border_effect_demo_camera.gd" id="3_4v1nn"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f68tu"]
+sun_angle_max = 79.09
+sun_curve = 0.0549032
+
+[sub_resource type="Sky" id="Sky_l36gc"]
+sky_material = SubResource("ProceduralSkyMaterial_f68tu")
+
+[sub_resource type="Environment" id="Environment_ajsgh"]
+sky = SubResource("Sky_l36gc")
+sky_custom_fov = 49.7
+
+[sub_resource type="Shader" id="14"]
+code = "shader_type canvas_item;
+
+uniform sampler2D view_prepass;
+uniform sampler2D view_blure;
+uniform sampler2D view_scene;
+uniform float intensity : hint_range(0, 5);
+
+void fragment() {
+	vec3 prepass = texture(view_prepass, UV).xyz; // prepass
+	vec3 blure = texture(view_blure, UV).xyz; // blurred
+	vec3 col = texture(view_scene, UV).xyz; // col
+	vec3 glow = min(vec3(1,1,1), max(vec3(0,0,0), blure - prepass)*intensity);
+	float luminance = glow.r * 0.299 + glow.g * 0.587 + glow.b * 0.114;
+	vec3 glow_inv = vec3(1.0,1.0,1.0) - vec3(luminance,luminance,luminance);
+	COLOR.xyz = col*glow_inv + glow;
+}"
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_uplvw"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_ouijx"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_2pqhe"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1rx8f"]
+resource_local_to_scene = true
+shader = SubResource("14")
+shader_parameter/intensity = 3.0
+shader_parameter/view_prepass = SubResource("ViewportTexture_ouijx")
+shader_parameter/view_blure = SubResource("ViewportTexture_uplvw")
+shader_parameter/view_scene = SubResource("ViewportTexture_2pqhe")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0nqfy"]
+albedo_color = Color(0.160784, 1, 0.231373, 1)
+
+[sub_resource type="BoxMesh" id="1"]
+material = SubResource("StandardMaterial3D_0nqfy")
+
+[node name="GlowBorderEffect" type="Node"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ajsgh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.652628, 0.599275, -0.463624, -0.391479, 0.790599, 0.470847, 0.648707, -0.125789, 0.75057, -4.13941, 1.90448, 5.97988)
+shadow_enabled = true
+
+[node name="GlowBorderEffectRenderer" parent="." instance=ExtResource("1_t44cp")]
+material = SubResource("ShaderMaterial_1rx8f")
+
+[node name="GlowingObject" type="Node3D" parent="."]
+script = ExtResource("2_llqfq")
+glow_border_effect = true
+
+[node name="GlowingCube" type="MeshInstance3D" parent="GlowingObject"]
+transform = Transform3D(1.84648, 0, -1.06778, -0.170645, 2.10558, -0.29509, 1.05406, 0.340878, 1.82275, 0, 0, 0)
+mesh = SubResource("1")
+skeleton = NodePath("../..")
+
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("glow_border_effect_renderer")]
+transform = Transform3D(1, 0, 0, 0, 0.916949, 0.399005, 0, -0.399005, 0.916949, 0, 1.72713, 5.97729)
+current = true
+script = ExtResource("3_4v1nn")
+glow_border_effect_renderer = NodePath("../GlowBorderEffectRenderer")
