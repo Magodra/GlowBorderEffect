@@ -3,21 +3,21 @@ class_name GlowBorderEffectObject
 extends Node3D
 # Class to apply to object that shall glow.
 # Apply the GlowBorderEffectObject to a spatial node that hold
-# GeometryInstances and that should have the glowing border effect
-# applied either statically through editor or dynamically
-# by calling the set_glow_border_effect function
+# GeometryInstances ("Shadow meshes") and that should have the 
+# glowing border effect applied either statically through editor
+# or dynamically by calling the set_glow_border_effect function.
 
 # Configuration of the glow color
 @export var glow_color : Color = Color.YELLOW
 
-# Configuration of the visual layer to use for drawing of shadow meshes
+# Configuration of the visual layer to use for drawing of shadow meshes.
 @export_flags_3d_render var effect_layer = 0x400 # (int, LAYERS_3D_RENDER)
 
 # Enable or disable the glow effect, either through
-# editor value or through the set_glow_border_effect function
+# editor value or through the set_glow_border_effect function.
 @export var glow_border_effect : bool = false : set = set_glow_border_effect
 
-# Hold reference to created shadow objects used for glow rendering
+# Hold reference to created shadow objects used for glow rendering.
 var _glow_shadow_objects : Array
 
 
@@ -27,7 +27,7 @@ func _ready():
 	glow_material.albedo_color = glow_color
 	
 	# Create shadow meshes for all GeometryInstances
-	# for glow effect rendering
+	# for glow effect rendering.
 	_create_shadow_meshes(self, glow_material)
 
 
@@ -38,7 +38,7 @@ func set_glow_border_effect(val : bool):
 
 
 # Create shadow meshes for all GeometryInstances
-# for glow effect rendering
+# for glow effect rendering.
 func _create_shadow_meshes(obj, glow_material):
 	# Recurse down the stucture in case
 	# GeometryInstance3D exists as childs
@@ -60,7 +60,7 @@ func _create_shadow_meshes(obj, glow_material):
 			# Clean up and remove children
 			for sub in glow_object.get_children():
 				glow_object.remove_child(sub)
-					
+			
 			# Remove scripts
 			glow_object.set_script(null)
 			

@@ -1,49 +1,59 @@
 extends SubViewportContainer
-# Collection of viewports and shaders to create the glowing border effect
+class_name GlowBorderEffectRenderer
+# Collection of viewports and shaders to create the glowing border effect.
 # The GlowBorderEffectRender configure the needed viewports and
 # ViewportContainers to create the glowing border effect.
 # To align the internal cameras with the current camera of your
 # scene call the camera_transform_changed.
 
+@export_category("Glow Boarder Effect Renderer")
+
 # Cull mask for cameras
 ## Set the cull mask used to view the visuall layer defined
-## for the GlowBorderEffectObject
+## for the GlowBorderEffectObject.
 @export_flags_3d_render var effect_cull_mask = 0x00400 : set = set_effect_cull_mask # (int, LAYERS_3D_RENDER)
 ## Set the cull mask use to render the scene. Should
 ## not include the effect_cull_mask bit.
 @export_flags_3d_render var scene_cull_mask = 0xffbff : set = set_scene_cull_mask # (int, LAYERS_3D_RENDER)
-## Set the intensity of the border
+## Set the intensity of the border.
 @export var intensity = 3.0 : set = set_intensity # (float, 0.0, 5.0, 0.1)
 
-# Create references to cameras
+@export_group("External Viewport","external_viewport_")
+## Use an external viewport for rendering.
+@export var external_viewport_use_external : bool = false
+#" The external viewport to use if use external is enabled.
+@export var external_viewport_viewport : Viewport = null
+
+# Create references to the internal cameras
 @onready var camera_prepass = %Camera3DPrepass
 @onready var camera_scene = %Camera3DScene
 
-# Create references to viewports
+# Create references to the internal viewports
 @onready var view_prepass = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass
 @onready var view_half_blure = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure
 @onready var view_blure = $ViewportBlure
 @onready var view_scene = $ViewportScene
 
-# Create references to viewport containers
+# Create references to the internal viewport containers
 @onready var container_gaussian_y = $ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY
 @onready var container_gaussian_x = $ViewportBlure/ViewportContainerBlureX
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	# Setup shader inputs
+	# Setup the shader inputs
 	material.set_shader_parameter("intensity", intensity)
 	material.set_shader_parameter("view_prepass", view_prepass.get_texture())
 	material.set_shader_parameter("view_blure", view_blure.get_texture())
-	material.set_shader_parameter("view_scene", view_scene.get_texture())
+	
+	if external_viewport_use_external and external_viewport_viewport:
+		material.set_shader_parameter("view_scene", external_viewport_viewport.get_texture())
+	else:
+		material.set_shader_parameter("view_scene", view_scene.get_texture())
 	
 	# Ensure that the internal cameras cull sceen and shadow objects
 	camera_prepass.cull_mask = effect_cull_mask
 	camera_scene.cull_mask = scene_cull_mask
-	
-	# Resize all internal views
-	#resize()
 
 
 # Setter function for the effect_cull_mask. Ensure update of prepass camera
@@ -66,15 +76,6 @@ func set_intensity(val):
 	material.set_shader_parameter("intensity", intensity)
 
 
-# Call this to resize all the internal views of the GlowBorderEffectRenderer
-#func resize():
-	#view_prepass.size = size
-	#view_half_blure.size = size
-	#view_blure.size = size
-	#view_scene.size = size
-	#container_gaussian_x.size = size
-	#container_gaussian_y.size = size
-
 
 # Call this function to align the internal cameras in the
 # GlowBorderEffectRenderer with an external camera
@@ -89,7 +90,9 @@ func camera_transform_changed(camera : Camera3D):
 func set_camera_parameters(camera : Camera3D):
 	# No need to update the following camera parameters:
 	# cull_mask as handled by separate functions
-	# current, doppler_tracking as this dosn't affect the rendering
+	# current, doppler_tracking as this dosn't affect the geometry of the rendering
+	
+	# Unhandled properties: attributes, doppler_tracking?
 	
 	# Update parameters effecting the rendering
 	camera_prepass.far = camera.far

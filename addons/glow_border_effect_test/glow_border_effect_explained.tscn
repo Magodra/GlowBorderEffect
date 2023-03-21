@@ -1,16 +1,16 @@
-[gd_scene load_steps=21 format=3 uid="uid://df1ilfxugnd5p"]
+[gd_scene load_steps=24 format=3 uid="uid://df1ilfxugnd5p"]
 
 [ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1"]
 [ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2"]
 
 [sub_resource type="GDScript" id="11"]
 script/source = "extends Node
-# Setup for displaying internal shader results in different view
+# Setup for displaying internal shader results in different views,
+# and provide a screen shot of the scene for use in the documentation.
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	#await RenderingServer.frame_post_draw
 	%ColorRectPrepass.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportPrepass\").get_texture())
 	%ColorRectHalfBlure.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportHalfBlure\").get_texture())
 	%ColorRectBlur.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportBlure\").get_texture())
@@ -18,7 +18,19 @@ func _ready():
 	%ColorRectGlow.material.set_shader_parameter(\"view_blure\", %GlowBorderEffectRenderer.find_child(\"ViewportPrepass\").get_texture())
 	%ColorRectScene.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportScene\").get_texture())
 	
+	# Now make a screen shot
+	await RenderingServer.frame_post_draw
+	get_node(\"/root\").get_viewport().get_texture().get_image().save_png(\"screenshots/glow_border_effect_explained.png\")
 "
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x36nn"]
+
+[sub_resource type="Sky" id="Sky_hmkq0"]
+sky_material = SubResource("ProceduralSkyMaterial_x36nn")
+
+[sub_resource type="Environment" id="Environment_ffi3p"]
+background_mode = 2
+sky = SubResource("Sky_hmkq0")
 
 [sub_resource type="Shader" id="Shader_w0lu2"]
 resource_local_to_scene = true
@@ -113,22 +125,19 @@ void fragment() {
 	COLOR.xyz = col*glow_inv + glow;
 }"
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_83oj4"]
-viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure")
+[sub_resource type="ViewportTexture" id="ViewportTexture_omrpl"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_v12h5"]
-viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
+[sub_resource type="ViewportTexture" id="ViewportTexture_l4h2o"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_cds62"]
-viewport_path = NodePath("ViewportScene")
+[sub_resource type="ViewportTexture" id="ViewportTexture_uxtg4"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_2q01f"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4s84g"]
 resource_local_to_scene = true
 shader = SubResource("14")
 shader_parameter/intensity = 3.0
-shader_parameter/view_prepass = SubResource("ViewportTexture_v12h5")
-shader_parameter/view_blure = SubResource("ViewportTexture_83oj4")
-shader_parameter/view_scene = SubResource("ViewportTexture_cds62")
+shader_parameter/view_prepass = SubResource("ViewportTexture_l4h2o")
+shader_parameter/view_blure = SubResource("ViewportTexture_omrpl")
+shader_parameter/view_scene = SubResource("ViewportTexture_uxtg4")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1cxsw"]
 albedo_color = Color(1, 0.0313726, 0.0235294, 1)
@@ -139,86 +148,115 @@ material = SubResource("StandardMaterial3D_1cxsw")
 [node name="GlowBorderEffectExplained" type="Node"]
 script = SubResource("11")
 
-[node name="GridContainer2" type="GridContainer" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ffi3p")
+
+[node name="GridContainerViews" type="GridContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
 columns = 3
 
-[node name="ColorRectPrepass" type="ColorRect" parent="GridContainer2"]
+[node name="ColorRectPrepass" type="ColorRect" parent="GridContainerViews"]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_5lsj6")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ColorRectHalfBlure" type="ColorRect" parent="GridContainer2"]
+[node name="ColorRectHalfBlure" type="ColorRect" parent="GridContainerViews"]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_tb5a1")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ColorRectBlur" type="ColorRect" parent="GridContainer2"]
+[node name="ColorRectBlur" type="ColorRect" parent="GridContainerViews"]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_ydawo")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ColorRectGlow" type="ColorRect" parent="GridContainer2"]
+[node name="ColorRectGlow" type="ColorRect" parent="GridContainerViews"]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_ktnsu")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ColorRectScene" type="ColorRect" parent="GridContainer2"]
+[node name="ColorRectScene" type="ColorRect" parent="GridContainerViews"]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_1uttx")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="GlowBorderEffectRenderer" parent="GridContainer2" instance=ExtResource("1")]
+[node name="GlowBorderEffectRenderer" parent="GridContainerViews" instance=ExtResource("1")]
 unique_name_in_owner = true
-material = SubResource("ShaderMaterial_2q01f")
+material = SubResource("ShaderMaterial_4s84g")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="GridContainer" type="GridContainer" parent="."]
+[node name="GridContainerLabels" type="GridContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 columns = 3
 
-[node name="Label1" type="Label" parent="GridContainer"]
+[node name="Label1" type="Label" parent="GridContainerLabels"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 6
-text = "Prepass draw shadow VisualInstances with glow color"
+size_flags_vertical = 3
+text = "First a prepass is draw using a shadow VisualInstance of the glowing objects."
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
 
-[node name="Label5" type="Label" parent="GridContainer"]
+[node name="Label2" type="Label" parent="GridContainerLabels"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Apply HalvBlure shader to the prepass"
+size_flags_vertical = 3
+text = "Then a vertical blure shader is applied to the prepass view texture."
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
 
-[node name="Label2" type="Label" parent="GridContainer"]
+[node name="Label3" type="Label" parent="GridContainerLabels"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Apply blure shader to the prepass"
+size_flags_vertical = 3
+text = "Second a horizontal blure shader is applied to the vertical blured texture image."
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
 
-[node name="Label3" type="Label" parent="GridContainer"]
-layout_mode = 2
-text = "Blure - Prepass = Glowing border :)"
-
-[node name="Label6" type="Label" parent="GridContainer"]
+[node name="Label4" type="Label" parent="GridContainerLabels"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Sceen rendered before apply of glow."
+size_flags_vertical = 3
+text = "Prepass image is substracted from blured image.
+Blure - Prepass = Glowing border"
+horizontal_alignment = 1
+vertical_alignment = 2
 
-[node name="Label4" type="Label" parent="GridContainer"]
+[node name="Label5" type="Label" parent="GridContainerLabels"]
 layout_mode = 2
-text = "Glowing border applied on top of sceen"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "The hole sceen is now rendered before applying of the glow."
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_mode = 3
+
+[node name="Label6" type="Label" parent="GridContainerLabels"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Glowing border applied on top of sceen."
+horizontal_alignment = 1
+vertical_alignment = 2
 
 [node name="Node3D" type="Node3D" parent="."]
 script = ExtResource("2")
@@ -230,6 +268,7 @@ mesh = SubResource("12")
 skeleton = NodePath("../..")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.839681, -0.326698, 0.433825, 0.0237971, 0.82019, 0.571596, -0.542558, -0.469635, 0.696472, 1.70341, 1.93462, 3.0689)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444541, 0.525308, -0.378266, 0.762211, -2.3437, 0.0859294, 1.97327)
+transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444541, 0.525308, -0.378266, 0.762211, -2.3437, 4.45341, 1.97327)
