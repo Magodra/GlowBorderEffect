@@ -3,7 +3,7 @@ class_name GlowBorderEffectObject
 extends Node3D
 # Class to apply to object that shall glow.
 # Apply the GlowBorderEffectObject to a spatial node that hold
-# GeometryInstances ("Shadow meshes") and that should have the 
+# GeometryInstances ("Shadow meshes") and that should have the
 # glowing border effect applied either statically through editor
 # or dynamically by calling the set_glow_border_effect function.
 

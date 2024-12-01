@@ -245,10 +245,10 @@ skeleton = NodePath("../../..")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="World"]
 root_node = NodePath("../..")
-autoplay = "Pan Camera3D"
 libraries = {
 "": SubResource("AnimationLibrary_e2lg2")
 }
+autoplay = "Pan Camera3D"
 
 [node name="Wall" type="MeshInstance3D" parent="World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.10108)
