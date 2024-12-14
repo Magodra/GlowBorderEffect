@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://df1ilfxugnd5p"]
+[gd_scene load_steps=21 format=3 uid="uid://bem3eo3dc3j4n"]
 
 [ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1"]
 [ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2"]
@@ -16,21 +16,11 @@ func _ready():
 	%ColorRectBlur.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportBlure\").get_texture())
 	%ColorRectGlow.material.set_shader_parameter(\"view_prepass\", %GlowBorderEffectRenderer.find_child(\"ViewportBlure\").get_texture())
 	%ColorRectGlow.material.set_shader_parameter(\"view_blure\", %GlowBorderEffectRenderer.find_child(\"ViewportPrepass\").get_texture())
-	%ColorRectScene.material.set_shader_parameter(\"view\", %GlowBorderEffectRenderer.find_child(\"ViewportScene\").get_texture())
 	
 	# Now make a screen shot
 	await RenderingServer.frame_post_draw
 	get_node(\"/root\").get_viewport().get_texture().get_image().save_png(\"screenshots/glow_border_effect_explained.png\")
 "
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x36nn"]
-
-[sub_resource type="Sky" id="Sky_hmkq0"]
-sky_material = SubResource("ProceduralSkyMaterial_x36nn")
-
-[sub_resource type="Environment" id="Environment_ffi3p"]
-background_mode = 2
-sky = SubResource("Sky_hmkq0")
 
 [sub_resource type="Shader" id="Shader_w0lu2"]
 resource_local_to_scene = true
@@ -39,7 +29,7 @@ code = "shader_type canvas_item;
 uniform sampler2D view;
 
 void fragment() {
-	COLOR.xyz = texture(view,UV).xyz;
+	COLOR.xyzw = texture(view,UV).xyzw;
 }
 "
 
@@ -54,7 +44,7 @@ code = "shader_type canvas_item;
 uniform sampler2D view;
 
 void fragment() {
-	COLOR.xyz = texture(view,UV).xyz;
+	COLOR.xyzw = texture(view,UV).xyzw;
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tb5a1"]
@@ -67,7 +57,7 @@ code = "shader_type canvas_item;
 uniform sampler2D view;
 
 void fragment() {
-	COLOR.xyz = texture(view,UV).xyz;
+	COLOR.xyzw = texture(view,UV).xyzw;
 }
 "
 
@@ -87,6 +77,7 @@ void fragment() {
 	vec3 blurred = texture(view_blure, UV).xyz; // blurred
 	vec3 glow = min(vec3(1,1,1), max(vec3(0,0,0), blurred - prepass)*intensity);
 	COLOR.xyz = glow;
+	COLOR.w = 1.0;
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ktnsu"]
@@ -94,62 +85,52 @@ resource_local_to_scene = true
 shader = SubResource("Shader_qqwfj")
 shader_parameter/intensity = 3.525
 
-[sub_resource type="Shader" id="Shader_c8nsn"]
-code = "shader_type canvas_item;
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_x36nn"]
 
-uniform sampler2D view;
+[sub_resource type="Sky" id="Sky_2j064"]
+sky_material = SubResource("ProceduralSkyMaterial_x36nn")
 
-void fragment() {
-	COLOR.xyz = texture(view,UV).xyz;
-}"
+[sub_resource type="Environment" id="Environment_ffi3p"]
+background_mode = 2
+sky = SubResource("Sky_2j064")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uttx"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s3rpq"]
+albedo_color = Color(1, 0.0313726, 0.0235294, 1)
+
+[sub_resource type="BoxMesh" id="12"]
+material = SubResource("StandardMaterial3D_s3rpq")
+
+[sub_resource type="Shader" id="Shader_s047d"]
 resource_local_to_scene = true
-shader = SubResource("Shader_c8nsn")
-
-[sub_resource type="Shader" id="14"]
 code = "shader_type canvas_item;
 
 uniform sampler2D view_prepass;
 uniform sampler2D view_blure;
-uniform sampler2D view_scene;
-uniform float intensity : hint_range(0, 5);
+uniform float intensity : hint_range(0.0, 5.0);
 
 void fragment() {
-	vec3 prepass = texture(view_prepass, UV).xyz; // prepass
-	vec3 blure = texture(view_blure, UV).xyz; // blurred
-	vec3 col = texture(view_scene, UV).xyz; // col
-	vec3 glow = min(vec3(1,1,1), max(vec3(0,0,0), blure - prepass)*intensity);
-	float luminance = glow.r * 0.299 + glow.g * 0.587 + glow.b * 0.114;
-	vec3 glow_inv = vec3(1.0,1.0,1.0) - vec3(luminance,luminance,luminance);
-	COLOR.xyz = col*glow_inv + glow;
+	vec4 prepass = texture(view_prepass, UV); // prepass
+	vec4 blure = texture(view_blure, UV); // blurred
+	
+	vec4 glow = min(vec4(1.0,1.0,1.0,1.0), max(vec4(0.0,0,0.0,0.0), blure - prepass))*intensity;
+	COLOR = glow;
 }"
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_omrpl"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_qne6m"]
+viewport_path = NodePath("ViewportBlure")
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_l4h2o"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_nscpl"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_uxtg4"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_4s84g"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xh21x"]
 resource_local_to_scene = true
-shader = SubResource("14")
+shader = SubResource("Shader_s047d")
 shader_parameter/intensity = 3.0
-shader_parameter/view_prepass = SubResource("ViewportTexture_l4h2o")
-shader_parameter/view_blure = SubResource("ViewportTexture_omrpl")
-shader_parameter/view_scene = SubResource("ViewportTexture_uxtg4")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1cxsw"]
-albedo_color = Color(1, 0.0313726, 0.0235294, 1)
-
-[sub_resource type="BoxMesh" id="12"]
-material = SubResource("StandardMaterial3D_1cxsw")
+shader_parameter/view_prepass = SubResource("ViewportTexture_nscpl")
+shader_parameter/view_blure = SubResource("ViewportTexture_qne6m")
 
 [node name="GlowBorderEffectExplained" type="Node"]
 script = SubResource("11")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_ffi3p")
 
 [node name="GridContainerViews" type="GridContainer" parent="."]
 anchors_preset = 15
@@ -186,18 +167,74 @@ material = SubResource("ShaderMaterial_ktnsu")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ColorRectScene" type="ColorRect" parent="GridContainerViews"]
+[node name="SubViewportContainer2" type="SubViewportContainer" parent="GridContainerViews"]
 unique_name_in_owner = true
-material = SubResource("ShaderMaterial_1uttx")
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="GlowBorderEffectRenderer" parent="GridContainerViews" instance=ExtResource("1")]
-unique_name_in_owner = true
-material = SubResource("ShaderMaterial_4s84g")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="GridContainerViews/SubViewportContainer2"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(384, 324)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="GridContainerViews/SubViewportContainer2/SubViewport"]
+environment = SubResource("Environment_ffi3p")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="GridContainerViews/SubViewportContainer2/SubViewport"]
+transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444542, 0.525308, -0.378266, 0.762211, -2.3437, 4.45341, 1.97327)
+
+[node name="Node3D" type="Node3D" parent="GridContainerViews/SubViewportContainer2/SubViewport"]
+script = ExtResource("2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GridContainerViews/SubViewportContainer2/SubViewport/Node3D"]
+transform = Transform3D(2.1714, 0, 0, 0, 2.1714, 0, 0, 0, 2.1714, 0, 0, 0)
+mesh = SubResource("12")
+skeleton = NodePath("../../../../..")
+
+[node name="Camera3D" type="Camera3D" parent="GridContainerViews/SubViewportContainer2/SubViewport"]
+transform = Transform3D(0.839681, -0.326698, 0.433825, 0.0237971, 0.82019, 0.571596, -0.542558, -0.469635, 0.696472, 1.70341, 1.93462, 3.0689)
+current = true
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="GridContainerViews"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="GridContainerViews/SubViewportContainer"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(384, 324)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="GridContainerViews/SubViewportContainer/SubViewport"]
+environment = SubResource("Environment_ffi3p")
+
+[node name="GlowBorderEffectRenderer" parent="GridContainerViews/SubViewportContainer/SubViewport" instance=ExtResource("1")]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_xh21x")
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="GridContainerViews/SubViewportContainer/SubViewport"]
+transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444542, 0.525308, -0.378266, 0.762211, -2.3437, 4.45341, 1.97327)
+
+[node name="Node3D" type="Node3D" parent="GridContainerViews/SubViewportContainer/SubViewport"]
+script = ExtResource("2")
+glow_border_effect = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GridContainerViews/SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(2.1714, 0, 0, 0, 2.1714, 0, 0, 0, 2.1714, 0, 0, 0)
+mesh = SubResource("12")
+skeleton = NodePath("../../../../..")
+
+[node name="Camera3D" type="Camera3D" parent="GridContainerViews/SubViewportContainer/SubViewport"]
+transform = Transform3D(0.839681, -0.326698, 0.433825, 0.0237971, 0.82019, 0.571596, -0.542558, -0.469635, 0.696472, 1.70341, 1.93462, 3.0689)
+current = true
 
 [node name="GridContainerLabels" type="GridContainer" parent="."]
 anchors_preset = 15
@@ -257,18 +294,3 @@ size_flags_vertical = 3
 text = "Glowing border applied on top of sceen."
 horizontal_alignment = 1
 vertical_alignment = 2
-
-[node name="Node3D" type="Node3D" parent="."]
-script = ExtResource("2")
-glow_border_effect = true
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D"]
-transform = Transform3D(2.1714, 0, 0, 0, 2.1714, 0, 0, 0, 2.1714, 0, 0, 0)
-mesh = SubResource("12")
-skeleton = NodePath("../..")
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.839681, -0.326698, 0.433825, 0.0237971, 0.82019, 0.571596, -0.542558, -0.469635, 0.696472, 1.70341, 1.93462, 3.0689)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444541, 0.525308, -0.378266, 0.762211, -2.3437, 4.45341, 1.97327)

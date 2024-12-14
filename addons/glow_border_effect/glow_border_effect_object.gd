@@ -1,20 +1,41 @@
+# Copyright (c) 2022-2024 Anders Reggestad
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 @icon("res://addons/glow_border_effect/glow_border_effect_renderer_icon.png")
 class_name GlowBorderEffectObject
 extends Node3D
-# Class to apply to object that shall glow.
-# Apply the GlowBorderEffectObject to a spatial node that hold
-# GeometryInstances ("Shadow meshes") and that should have the
-# glowing border effect applied either statically through editor
-# or dynamically by calling the set_glow_border_effect function.
+## Class to apply to object that shall glow.
+##
+## Apply the GlowBorderEffectObject as a parent to a spatial node that hold
+## GeometryInstances ("Shadow meshes") and that should have the
+## glowing border effect applied either statically through editor
+## or dynamically by setting the [member glow_border_effect].
 
-# Configuration of the glow color
+## Configuration of the glow color.
 @export var glow_color : Color = Color.YELLOW
 
-# Configuration of the visual layer to use for drawing of shadow meshes.
+## Configuration of the visual layer to use for drawing of shadow meshes.
 @export_flags_3d_render var effect_layer = 0x400 # (int, LAYERS_3D_RENDER)
 
-# Enable or disable the glow effect, either through
-# editor value or through the set_glow_border_effect function.
+## Enable or disable the glow effect, either through
+## editor value or through the setter method [method set_glow_border_effect].
 @export var glow_border_effect : bool = false : set = set_glow_border_effect
 
 # Hold reference to created shadow objects used for glow rendering.
