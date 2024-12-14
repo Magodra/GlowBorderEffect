@@ -4,6 +4,9 @@
 
 The **Glow Boarder Effect Renderer** contains shader setup with a glowing boarder effect for selected objects.
 The user can turn the **glow border effect** on and off and select **glow color** for individual objects.
+Either automatically or manual camera update can be selected. In automatic mode the the internal camera will 
+use the current camera to align the internal rendering. See Manual updating the camera for details regarding
+manual mode.
 
 # How does it work?
 ![Glow Border Effect Demo Scene](screenshots/glow_border_effect_demo_scene.PNG)
@@ -12,10 +15,10 @@ The **GlowBorderEffectRender** scene is included in the scene tree and objects t
 must include the GDScript **glow_border_effect_object.gd** on a Spatial node that is a parent to any **VisualInstances** the object
 may consists of. In the demo project the GlowingObject is a Spatial node with a MeshInstance as the child.
 
-## Updating camera
+## Manual Updating camera
 
-In the **GlowBorderEffectDemo** a GDScript is used on the scene **Camera** to ensure that the internal cameras
-of the **GlowBorderEffectRender** is updated when the camera position is update.
+If **Automatically Update camera** is uncheck on the **Glob Boarder Effect Renderer** the internal camera need to be updated
+manually. The script below show how to update the camera manually. This isn't needed if automatically update is selected.
 
 ```GDScript
 # Called when the node enters the scene tree for the first time.
