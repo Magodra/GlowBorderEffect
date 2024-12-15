@@ -1,8 +1,7 @@
-[gd_scene load_steps=20 format=3 uid="uid://ddnxlo4hjr054"]
+[gd_scene load_steps=19 format=3 uid="uid://ddnxlo4hjr054"]
 
 [ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1_nu2gu"]
 [ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2_53moe"]
-[ext_resource type="Script" path="res://addons/glow_border_effect_test/glow_border_effect_demo_camera.gd" id="3_lwun3"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f68tu"]
 sun_angle_max = 79.09
@@ -31,18 +30,18 @@ void fragment() {
 	COLOR = glow;
 }"
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_ljed5"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_6b8h6"]
 viewport_path = NodePath("ViewportBlure")
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_7adyl"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_d8bds"]
 viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fcnpx"]
 resource_local_to_scene = true
 shader = SubResource("Shader_b1m4v")
 shader_parameter/intensity = 3.0
-shader_parameter/view_prepass = SubResource("ViewportTexture_7adyl")
-shader_parameter/view_blure = SubResource("ViewportTexture_ljed5")
+shader_parameter/view_prepass = SubResource("ViewportTexture_d8bds")
+shader_parameter/view_blure = SubResource("ViewportTexture_6b8h6")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0nqfy"]
 albedo_color = Color(0.160784, 1, 0.231373, 1)
@@ -250,11 +249,10 @@ skeleton = NodePath("../CameraGimbal")
 
 [node name="CameraGimbal" type="Node3D" parent="World"]
 
-[node name="Camera3D" type="Camera3D" parent="World/CameraGimbal" node_paths=PackedStringArray("glow_border_effect_renderer")]
+[node name="Camera3D" type="Camera3D" parent="World/CameraGimbal"]
 transform = Transform3D(1, 0, 0, 0, 0.916949, 0.399005, 0, -0.399005, 0.916949, 0, 1.72713, 5.97729)
+cull_mask = 1047551
 current = true
-script = ExtResource("3_lwun3")
-glow_border_effect_renderer = NodePath("")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
 transform = Transform3D(0.677896, 0.593802, -0.433424, -0.391479, 0.790599, 0.470847, 0.622254, -0.149509, 0.768405, 4.2185, 0.229401, 0)

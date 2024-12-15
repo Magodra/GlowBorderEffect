@@ -18,30 +18,27 @@
 # CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-extends Camera3D
+@tool
+extends EditorPlugin
 
 
-# Sort the exports under this category
-@export_category("Glow Boarder Effect Camera")
-
-## Reference to the glow border effect renderer for update of
-## camera parameters and transforms.
-@export var glow_border_effect_renderer : GlowBorderEffectRenderer
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	# Update the internal cameras in the glow border effect renderer.
-	#glow_border_effect_renderer.set_camera_parameters(self)
+func _enter_tree() -> void:
+	# Initialization of the plugin goes here.
 	
-	# Turn on notification for camera transform changes.
-	#set_notify_transform(true)
+	# Scenes not supported as custom types yet!
+	#add_custom_type("GlowBorderEffectRenderer","SubViewportContainer",preload("res://addons/glow_border_effect/glow_border_effect_renderer.gd"),preload("res://addons/glow_border_effect/glow_border_effect_renderer_icon.svg"))
+	
+	# Add the EffectObject as this is a script that is attached to an object.
+	add_custom_type("GlowBorderEffectObject","Node3d",preload("res://addons/glow_border_effect/glow_border_effect_object.gd"),preload("res://addons/glow_border_effect/internal/glow_border_effect_object_icon.svg"))
 	pass
 
 
-# Called when the node receive notifications.
-func _notification(what):
-	# Update the camera transform each time the camera transform change.
-	if what == NOTIFICATION_TRANSFORM_CHANGED:
-		#glow_border_effect_renderer.camera_transform_changed(self)
-		pass
+func _exit_tree() -> void:
+	# Clean-up of the plugin goes here.
+	
+	# Maybe some time...
+	#remove_custom_type("GlowBorderEffectRenderer")
+	
+	# Remove the scriopt
+	remove_custom_type("GlowBorderEffectObject")
+	pass

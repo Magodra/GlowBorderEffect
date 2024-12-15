@@ -100,7 +100,7 @@ albedo_color = Color(1, 0.0313726, 0.0235294, 1)
 [sub_resource type="BoxMesh" id="12"]
 material = SubResource("StandardMaterial3D_s3rpq")
 
-[sub_resource type="Shader" id="Shader_s047d"]
+[sub_resource type="Shader" id="Shader_43p7c"]
 resource_local_to_scene = true
 code = "shader_type canvas_item;
 
@@ -124,7 +124,7 @@ viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlur
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xh21x"]
 resource_local_to_scene = true
-shader = SubResource("Shader_s047d")
+shader = SubResource("Shader_43p7c")
 shader_parameter/intensity = 3.0
 shader_parameter/view_prepass = SubResource("ViewportTexture_nscpl")
 shader_parameter/view_blure = SubResource("ViewportTexture_qne6m")
@@ -217,8 +217,6 @@ environment = SubResource("Environment_ffi3p")
 [node name="GlowBorderEffectRenderer" parent="GridContainerViews/SubViewportContainer/SubViewport" instance=ExtResource("1")]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_xh21x")
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="GridContainerViews/SubViewportContainer/SubViewport"]
 transform = Transform3D(0.850912, 0.233521, -0.470549, 0, 0.895758, 0.444542, 0.525308, -0.378266, 0.762211, -2.3437, 4.45341, 1.97327)

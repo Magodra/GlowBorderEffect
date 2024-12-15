@@ -1,8 +1,8 @@
 [gd_scene load_steps=10 format=3 uid="uid://mjc1ujficlc2"]
 
-[ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_rederer.gd" id="1"]
-[ext_resource type="Shader" path="res://addons/glow_border_effect/blure_alpha_pass_shader.gdshader" id="3_37o2n"]
-[ext_resource type="Environment" uid="uid://b6hqsqakkwgfo" path="res://addons/glow_border_effect/glow_camera_environment.tres" id="5"]
+[ext_resource type="Script" path="res://addons/glow_border_effect/internal/glow_border_effect_renderer.gd" id="1_uep8e"]
+[ext_resource type="Shader" path="res://addons/glow_border_effect/internal/blure_alpha_pass_shader.gdshader" id="3_37o2n"]
+[ext_resource type="Environment" uid="uid://b6hqsqakkwgfo" path="res://addons/glow_border_effect/internal/glow_camera_environment.tres" id="5"]
 
 [sub_resource type="Shader" id="Shader_b1m4v"]
 code = "shader_type canvas_item;
@@ -52,7 +52,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 stretch = true
-script = ExtResource("1")
+script = ExtResource("1_uep8e")
 
 [node name="ViewportBlure" type="SubViewport" parent="."]
 transparent_bg = true

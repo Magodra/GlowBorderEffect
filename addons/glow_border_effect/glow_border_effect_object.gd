@@ -18,7 +18,7 @@
 # CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-@icon("res://addons/glow_border_effect/glow_border_effect_renderer_icon.png")
+@icon("res://addons/glow_border_effect/internal/glow_border_effect_object_icon.svg")
 class_name GlowBorderEffectObject
 extends Node3D
 ## Class to apply to object that shall glow.
