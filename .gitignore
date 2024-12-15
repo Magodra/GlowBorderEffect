@@ -6,6 +6,7 @@
 export.cfg
 export_presets.cfg
 *.png.import
+*.svg.import
 .godot
 
 # Imported translations (automatically generated from CSV files)
