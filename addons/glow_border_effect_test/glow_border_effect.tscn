@@ -1,0 +1,71 @@
+[gd_scene load_steps=12 format=3 uid="uid://c0udptehlmrf8"]
+
+[ext_resource type="PackedScene" uid="uid://mjc1ujficlc2" path="res://addons/glow_border_effect/glow_border_effect_renderer.tscn" id="1_ax5oq"]
+[ext_resource type="Script" path="res://addons/glow_border_effect/glow_border_effect_object.gd" id="2_kx8on"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0v0ys"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_bv02p"]
+sky_material = SubResource("ProceduralSkyMaterial_0v0ys")
+
+[sub_resource type="Environment" id="Environment_gt5ly"]
+background_mode = 2
+sky = SubResource("Sky_bv02p")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="Shader" id="Shader_b1m4v"]
+code = "shader_type canvas_item;
+
+uniform sampler2D view_prepass;
+uniform sampler2D view_blure;
+uniform float intensity : hint_range(0.0, 5.0);
+
+void fragment() {
+	vec4 prepass = texture(view_prepass, UV); // prepass
+	vec4 blure = texture(view_blure, UV); // blurred
+	
+	vec4 glow = min(vec4(1.0,1.0,1.0,1.0), max(vec4(0.0,0,0.0,0.0), blure - prepass))*intensity;
+	COLOR = glow;
+}"
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_2uwsa"]
+viewport_path = NodePath("ViewportBlure")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_hsu68"]
+viewport_path = NodePath("ViewportBlure/ViewportContainerBlureX/ViewportHalfBlure/ViewportContainerBlureY/ViewportPrepass")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_go2ax"]
+resource_local_to_scene = true
+shader = SubResource("Shader_b1m4v")
+shader_parameter/intensity = 3.0
+shader_parameter/view_prepass = SubResource("ViewportTexture_hsu68")
+shader_parameter/view_blure = SubResource("ViewportTexture_2uwsa")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ddj0f"]
+albedo_color = Color(0, 0.80266, 0.304589, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_es1nu"]
+material = SubResource("StandardMaterial3D_ddj0f")
+
+[node name="GlowBorderEffect" type="Node3D"]
+editor_description = "Minimum setup for use of the GlowBorderEffect."
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_gt5ly")
+
+[node name="GlowBorderEffectRenderer" parent="." instance=ExtResource("1_ax5oq")]
+material = SubResource("ShaderMaterial_go2ax")
+
+[node name="GlowBorderEffectObject" type="Node3D" parent="."]
+script = ExtResource("2_kx8on")
+glow_border_effect = true
+
+[node name="GlowingCube" type="MeshInstance3D" parent="GlowBorderEffectObject"]
+mesh = SubResource("BoxMesh_es1nu")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.877583, -0.229849, 0.420735, 0, 0.877583, 0.479426, -0.479426, -0.420736, 0.770151, 1.06054, 1.20848, 1.9413)
+cull_mask = 1047551

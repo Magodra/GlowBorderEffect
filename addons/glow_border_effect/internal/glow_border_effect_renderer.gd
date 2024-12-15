@@ -153,6 +153,7 @@ func _on_camera_transform_changed(camera : Camera3D):
 func _process(delta: float) -> void:
 	if automatically_update_camera:
 		var camera = get_viewport().get_camera_3d()
-		set_camera_parameters(camera)
-		camera_transform_changed(camera)
-		camera.cull_mask &= scene_cull_mask
+		if camera:
+			set_camera_parameters(camera)
+			camera_transform_changed(camera)
+			camera.cull_mask &= scene_cull_mask
